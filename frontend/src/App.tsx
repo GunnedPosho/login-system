@@ -1,8 +1,16 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import LoginPage from './features/auth/LoginPage'
+import RegisterPage from './features/auth/RegisterPage'
+import ForgotPasswordPage from './features/auth/ForgotPasswordPage'
+
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-900">
-      <h1 className="text-4xl font-bold text-white">login-system ✅</h1>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+    </Routes>
   )
 }
 
