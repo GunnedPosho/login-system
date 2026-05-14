@@ -1,7 +1,9 @@
 from pydantic_settings import BaseSettings
-
+from pydantic import ConfigDict
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file=".env")
+
     DATABASE_URL: str
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
@@ -9,9 +11,5 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     APP_ENV: str = "development"
     APP_NAME: str = "login-system"
-
-    class Config:
-        env_file = ".env"
-
 
 settings = Settings()
