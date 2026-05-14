@@ -21,7 +21,7 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('access_token'),
   isLoading: false,
 
   login: async (email, password) => {
