@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom'
 import AuthLayout from '../../shared/components/AuthLayout'
 import Input from '../../shared/components/Input'
 
+import { useState } from 'react'
+
 const schema = z.object({
   email: z.string().email('Email inválido'),
 })
@@ -12,12 +14,18 @@ const schema = z.object({
 type ForgotPasswordForm = z.infer<typeof schema>
 
 function ForgotPasswordPage() {
+  const [message, setMessage] = useState<string | null>(null)
+
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordForm>({
     resolver: zodResolver(schema),
   })
 
-  const onSubmit = (data: ForgotPasswordForm) => {
-    console.log(data)
+  const onSubmit = async (_data: ForgotPasswordForm) => {
+    try {
+      setMessage('Si el email existe, recibirás un correo con instrucciones.')
+    } catch {
+      setMessage('Si el email existe, recibirás un correo con instrucciones.')
+    }
   }
 
   return (
@@ -35,6 +43,7 @@ function ForgotPasswordPage() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          {message && <p className="text-sm text-green-500">{message}</p>}
           <Input
             label="Email"
             type="email"

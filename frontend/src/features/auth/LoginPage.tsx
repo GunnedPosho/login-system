@@ -5,6 +5,10 @@ import { Link } from 'react-router-dom'
 import AuthLayout from '../../shared/components/AuthLayout'
 import Input from '../../shared/components/Input'
 
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../stores/authStore'
+
 const schema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
@@ -13,12 +17,22 @@ const schema = z.object({
 type LoginForm = z.infer<typeof schema>
 
 function LoginPage() {
+  const { login, isLoading } = useAuthStore()
+  const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(schema),
   })
 
-  const onSubmit = (data: LoginForm) => {
-    console.log(data)
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      setError(null)
+      await login(data.email, data.password)
+      navigate('/dashboard')
+    } catch {
+      setError('Credenciales inválidas')
+    }
   }
 
   return (
@@ -36,6 +50,7 @@ function LoginPage() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <Input
             label="Email"
             type="email"
@@ -62,10 +77,11 @@ function LoginPage() {
 
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer text-text hover:opacity-85"
             style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-end))' }}
           >
-            Iniciar sesión
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
         </form>
 

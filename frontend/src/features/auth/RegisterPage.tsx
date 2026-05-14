@@ -5,6 +5,10 @@ import { Link } from 'react-router-dom'
 import AuthLayout from '../../shared/components/AuthLayout'
 import Input from '../../shared/components/Input'
 
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../stores/authStore'
+
 const schema = z.object({
   name: z.string().min(2, 'Mínimo 2 caracteres'),
   email: z.string().email('Email inválido'),
@@ -18,12 +22,22 @@ const schema = z.object({
 type RegisterForm = z.infer<typeof schema>
 
 function RegisterPage() {
+  const { register: registerUser, isLoading } = useAuthStore()
+  const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
     resolver: zodResolver(schema),
   })
 
-  const onSubmit = (data: RegisterForm) => {
-    console.log(data)
+  const onSubmit = async (data: RegisterForm) => {
+    try {
+      setError(null)
+      await registerUser(data.name, data.email, data.password)
+      navigate('/login')
+    } catch {
+      setError('Error al crear la cuenta. Intenta de nuevo.')
+    }
   }
 
   return (
@@ -41,6 +55,7 @@ function RegisterPage() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <Input
             label="Nombre completo"
             type="text"
@@ -72,10 +87,11 @@ function RegisterPage() {
 
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer text-text hover:opacity-85"
             style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-end))' }}
           >
-            Crear cuenta
+            {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
 
