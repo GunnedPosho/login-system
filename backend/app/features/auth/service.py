@@ -8,25 +8,37 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
 )
-
+import secrets
+from app.core.email import send_verification_email
 
 def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
 
 def create_user(db: Session, data: RegisterRequest) -> User:
-    if get_user_by_email(db, data.email):
-        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    existing_user = get_user_by_email(db, data.email)
+    if existing_user:
+        if existing_user.is_verified:
+            raise HTTPException(status_code=400, detail="El email ya está registrado")
+        token = secrets.token_urlsafe(32)
+        existing_user.verification_token = token
+        db.commit()
+        send_verification_email(existing_user.email, token)
+        return existing_user
+
+    token = secrets.token_urlsafe(32)
 
     user = User(
         name=data.name,
         email=data.email,
         hashed_password=hash_password(data.password),
+        verification_token=token,
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
+    send_verification_email(user.email, token)
     return user
 
 
@@ -48,3 +60,6 @@ def generate_tokens(user: User) -> dict:
     
 def get_user_by_id(db: Session, user_id: str) -> User | None:
     return db.query(User).filter(User.id == user_id).first()
+
+def verify_user_token(db: Session, token: str) -> User | None:
+    return db.query(User).filter(User.verification_token == token).first()

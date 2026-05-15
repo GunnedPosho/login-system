@@ -5,6 +5,7 @@ import ForgotPasswordPage from './features/auth/ForgotPasswordPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import ProtectedRoute from './shared/components/ProtectedRoute'
 import PublicRoute from './shared/components/PublicRoute'
+import VerifyEmailPage from './features/auth/VerifyEmailPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

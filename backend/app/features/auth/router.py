@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.features.auth.schemas import RegisterRequest, LoginRequest, UserResponse, AuthResponse, RefreshRequest, RefreshResponse
-from app.features.auth.service import create_user, authenticate_user, generate_tokens, get_user_by_id
+from app.features.auth.service import create_user, authenticate_user, generate_tokens, get_user_by_id, verify_user_token
 from app.core.security import decode_token, create_access_token
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse)
@@ -38,3 +39,15 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
     return RefreshResponse(
         access_token=create_access_token({"sub": str(user.id)})
     )
+    
+@router.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    user = verify_user_token(db, token)
+    if not user:
+        raise HTTPException(status_code=400, detail="Token inválido o expirado")
+
+    user.is_verified = True
+    user.verification_token = None
+    db.commit()
+
+    return {"message": "Email verificado correctamente"}
