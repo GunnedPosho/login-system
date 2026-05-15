@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef,  useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import api from '../../lib/api'
 import AuthLayout from '../../shared/components/AuthLayout'
@@ -7,8 +7,14 @@ function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
 
+  const called = useRef(false)
+
   useEffect(() => {
+    if (called.current) return
+    called.current = true
+
     const token = searchParams.get('token')
+
     if (!token) {
       setStatus('error')
       return
